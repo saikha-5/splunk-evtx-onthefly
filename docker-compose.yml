@@ -1,0 +1,34 @@
+version: "3.6"
+
+services:
+  splunk:
+    image: ${SPLUNK_IMAGE:-splunk/splunk:latest}
+    container_name: splunk
+    environment:
+      - SPLUNK_START_ARGS=--accept-license
+      - SPLUNK_PASSWORD=evtxonthefly
+    ports:
+      - 8000:8000
+      - 8088
+      - 8089
+    volumes:
+      - ./splunk_configs/user-prefs.conf:/opt/splunk/etc/users/admin/user-prefs/local/user-prefs.conf
+      - ./splunk_configs/evtx_on_the_fly_main_dashboard.xml:/opt/splunk/etc/apps/search/local/data/ui/views/evtx_on_the_fly_main_dashboard.xml
+
+  evtx_converter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: evtx_converter
+    environment:
+      - SPLUNK_URL=splunk
+      - SPLUNK_PORT=8000
+      - SPLUNK_MPORT=8089
+      - SPLUNK_SSL=False
+      - SPLUNK_USER=admin
+      - SPLUNK_PASS=evtxonthefly
+    depends_on:
+      splunk:
+        condition: service_healthy
+    links:
+      - splunk
