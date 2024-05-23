@@ -12,8 +12,8 @@ services:
       - 8088
       - 8089
     volumes:
-      - ./splunk_configs/user-prefs.conf:/opt/splunk/etc/users/admin/user-prefs/local/user-prefs.conf
-      - ./splunk_configs/evtx_on_the_fly_main_dashboard.xml:/opt/splunk/etc/apps/search/local/data/ui/views/evtx_on_the_fly_main_dashboard.xml
+      - ./splunk_configs/user-prefs.conf:/opt/splunk/etc/users/admin/user-prefs/local/user->
+      - ./splunk_configs/evtx_on_the_fly_main_dashboard.xml:/opt/splunk/etc/apps/search/loc>
 
   evtx_converter:
     build:
@@ -30,5 +30,7 @@ services:
     depends_on:
       splunk:
         condition: service_healthy
-    links:
-      - splunk
+    volumes:
+      - type: bind
+        source: ./evtx_files
+        target: /evtx2splunk/evtx_files
